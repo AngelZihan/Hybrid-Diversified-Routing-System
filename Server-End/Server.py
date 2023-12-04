@@ -78,9 +78,9 @@ def server():
 
         # model = LitClassifier.load_from_checkpoint("~/zihan/NY_GNN/checkpoint/lightning_logs/version_187/checkpoints/epoch=5-val_loss=0.47.ckpt")
         # model = LitClassifier.load_from_checkpoint(
-        #     "~/zihan/NY_GNN/checkpoint/lightning_logs/version_418/checkpoints/epoch=5-val_loss=363.05.ckpt")
+        #     "./epoch=5-val_loss=363.05.ckpt")
         model = LitClassifier.load_from_checkpoint(
-            "~/zihan/COL_GNN/checkpoint/lightning_logs/version_42/checkpoints/epoch=11-val_loss=334.66.ckpt")
+            "./epoch=11-val_loss=334.66.ckpt")
         model.to("cuda:7")
         trainer = pl.Trainer(accelerator="gpu", devices=[7])
 
