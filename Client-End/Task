@@ -1,0 +1,28 @@
+Graph Data
+COL
+NY
+MAN
+
+
+Tabular Data
+COL
+NY Done
+MAN Done
+
+Model
+COL
+MAN
+NY
+
+Baseline Algorithm
+Average Length
+Time
+
+
+Test Q1-Q4 with t = 0.7 k = 5
+Test t = 0.3 0.5 0.7 0.9 Q2 k = 5
+Test 3 5 10 20 t = 0.7 Q2
+
+
+NY
+
