@@ -45,7 +45,7 @@ Then, use the code to run:
 $ ./classification
 ```
 
-The client related files have uploaded in: 
+The client related files have been uploaded in: 
 
 ## Change Parameter
 | Parameter            | File      | How to Change                            |
