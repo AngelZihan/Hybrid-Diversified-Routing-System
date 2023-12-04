@@ -46,13 +46,14 @@ $ ./classification
 ```
 
 ## Change Parameter
-| Parameter | File | How to Change |
-| ------ | ------ | ------ |
-| Road File | main.cpp | Change the 'filename' address |
-| Query File | main.cpp | Change the 'queryFilename' address |
-| Algorithm | main.cpp | Uncomment the algorithm |
-| Path Number | main.cpp | Change the 'k' value |
-| Similarity Threshold | main.cpp | Change the 't' value |
+| Parameter            | File      | How to Change                            |
+|----------------------|-----------|------------------------------------------|
+| Road File            | main.cpp  | Change the 'filename' address            |
+| Query File           | main.cpp  | Change the 'queryFilename' address       |
+| Algorithm            | main.cpp  | Uncomment the algorithm                  |
+| Path Number          | main.cpp  | Change the 'k' value                     |
+| Similarity Threshold | main.cpp  | Change the 't' value                     |
+| model                | Server.py | Change the 'model' value to related file |
 
 ## Running Result
 
