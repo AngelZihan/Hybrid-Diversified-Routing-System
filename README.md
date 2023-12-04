@@ -45,8 +45,7 @@ Then, use the code to run:
 $ ./classification
 ```
 
-The client related files have been uploaded in: 
-
+The client related files have been uploaded in: , please make sure these files have been put into the Client-End folder to make sure the code can run successfully.
 ## Change Parameter
 | Parameter            | File      | How to Change                            |
 |----------------------|-----------|------------------------------------------|
