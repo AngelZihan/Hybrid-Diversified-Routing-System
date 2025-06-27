@@ -15,24 +15,34 @@
 #include "ClassificationSystem.h"
 #include "CoherenceDecomposition.h"
 #include "kspwlo.hpp"
+#include <algorithm>
+#include <cctype>
+#include <boost/algorithm/string.hpp>
 
 #define BUFFER_SIZE 1024
 
 
-const std::string terminator = "END_OF_MESSAGE";
+using namespace boost::algorithm;
+string trim(const string& str) {
+    const auto strBegin = std::find_if_not(str.begin(), str.end(), ::isspace);
+    const auto strEnd = std::find_if_not(str.rbegin(), str.rend(), ::isspace).base();
+    return (strBegin < strEnd ? std::string(strBegin, strEnd) : "");
+}
+const string terminator = "END_OF_MESSAGE";
 int main() {
     std::chrono::high_resolution_clock::time_point t1;
     std::chrono::high_resolution_clock::time_point t2;
     std::chrono::duration<double> time_span;
+    std::map<std::string, double> timing_sums;
+    std::map<std::string, int> timing_counts;
 
     Classification obj1;
 
 
     vector<int> ID1List;
     vector<int> ID2List;
-    //string queryFile = "./NY_NodePair";
-//    string queryFile = "./NY/USA-NY-Q2.txt";
-    string queryFile = "./COL/USA-COL-Q2.txt";
+//    string queryFile = "./COL/USA-COL-Q1.txt";
+    string queryFile = "./NY/USA-NY-Q1.txt";
     cout << "Reading " << queryFile << endl;
     ifstream inGraph(queryFile);
     if(!inGraph)
@@ -54,11 +64,16 @@ int main() {
     }
     inGraph.close();
 
-//    string graphFile = "./USA-road-d.NY.gr";
-    string graphFile = "./USA-road-d.COL.gr";
+//    string graphFile = "./USA-road-d.COL.gr";
+    string graphFile = "./USA-road-d.NY.gr";
     Graph G=Graph(graphFile);
     //CoherenceDecomposition cd = CoherenceDecomposition(&G, 4, mm, nn);
 
+
+
+    map<pair<int, int>, int> trueLabels;
+
+    string predictionStr;
     double totalTime = 0;
     vector<int> averageLength;
     float totalMaxSim = 0;
@@ -94,16 +109,7 @@ int main() {
 
         t1 = std::chrono::high_resolution_clock::now();
         int SP = obj1.FirstPath(&G, ID1,ID2,edge_attribute,edge_index,graph_data,staMatrix, vSPTDistance, vSPTParent, vSPTHeight, vSPTParentEdge, vSPTChildren, vSPT, vvPathCandidate, vvPathCandidateEdge, kResults, vkPath);
-        /*cout << "SP:" << SP << " xLevel: " << xLevel << " yLevel: " << yLevel << endl;
-        for(int i = 0; i < staMatrix.size(); i++)
-        {
-            for(int j = 0; j < staMatrix[i].size(); j++){
-                cout << staMatrix[i][j] << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;*/
-//        t1 = std::chrono::high_resolution_clock::now();
+
         string edge_attribute1;
         string edge_index1;
         for (int i = 0; i < edge_index.size(); ++i) {
@@ -115,11 +121,8 @@ int main() {
             graph_data1 = graph_data1 + "[" + graph_data[i].first + "," + graph_data[i].second + "]" + " ";
         }
 
-//        string outFilename = "./NY_Result_changeKSP_fileNew_addKSPLost";
-        //string outFilename = "./NY_additionalDataset";
-       // string outFilename = "./COL_additionalDataset";
-//        string outFilename = "./COL_Result_changeKSP_fileNew_addKSPLost";
-        string outFilename = "./COL_Result_changeKSP_fileNew3";
+        string outFilename = "./NY_Result_changeKSP_fileNew_addKSPLost";
+//        string outFilename = "./COL_Result_changeKSP_fileNew_addKSPLost2";
         string tabular_data1;
         string tabular_data2;
 
@@ -145,28 +148,15 @@ int main() {
                         KSP.push_back(stod(vs[i]));
                         //cout << KSP[0] << endl;
                     }
-                    /*vector<int> Matrix;
-                    for (int j = 15; j < 50; ++j) {
-                        Matrix.push_back(stoi(vs[j]));
-                    }*/
-                    /*tabular_data = to_string(k) + "," + to_string(t) + "," + to_string(coverNumber) + "," +
-                                   to_string(CEONumber) + "," + to_string(SP) + ",";
-                    for (int i = 0; i < 4; ++i) {
-                        tabular_data = tabular_data + to_string(KSP[i]) + ",";
-                    }
 
-                    for (int m = 0; m < staMatrix.size(); m++) {
-                        for(int n = 0; n < staMatrix[m].size(); n++) {
-                            if(m == 4 && n == 6){
-                                tabular_data = tabular_data + to_string(staMatrix[m][n]) + " ";
-                            }
-                            else{
-                                tabular_data = tabular_data + to_string(staMatrix[m][n]) + ",";
-                            }
-                        }
-                    }*/
+//                    NY
                     tabular_data1 = to_string(k) + "," + to_string(t) + "," + to_string(coverNumber) + "," +
                                    to_string(CEONumber) + "," + to_string(SP) + ",";
+//                    COL
+//                    tabular_data1 = to_string(coverNumber) + "," +
+//                                    to_string(CEONumber) + "," + to_string(SP) + ",";
+
+
                     for (int i = 0; i < 3; ++i) {
                         tabular_data1 = tabular_data1 + to_string(KSP[i]) + ",";
                     }
@@ -194,13 +184,8 @@ int main() {
                 }
             }
         }
-        //cout << tabular_data << endl;
 
-        //std::string combined_data = edge_attribute1 + "|" + edge_index1 + "|" + graph_data1 + "|" + tabular_data + "|" + terminator;
         std::string combined_data = edge_attribute1 + "|" + edge_index1 + "|" + graph_data1 + "|" + tabular_data1 + "|" + tabular_data2 + "|" + terminator;
-//        cout << combined_data << endl;
-//        cout << tabular_data1 << endl;
-        //cout << "Received from server:\n" << combined_data << std::endl;
 
         int sock = socket(AF_INET, SOCK_STREAM, 0);
         if (sock == -1) {
@@ -233,42 +218,54 @@ int main() {
 
         // Receive the processed result
         char buffer[1024] = {0};
-        recv(sock, buffer, sizeof(buffer), 0);
-        cout << "Received from server: " << buffer << std::endl;
+        int bytes_received = recv(sock, buffer, sizeof(buffer) - 1, 0);  // 防止越界
+
+        if (bytes_received <= 0) {
+            cerr << "Error: failed to receive data from server." << endl;
+            close(sock);
+            return -1;
+        }
+
+        buffer[bytes_received] = '\0';
+
+        string response(buffer);
+        cout << "Full response: " << response << endl;
+
+        predictionStr = buffer;
 
 
 
+        int predictedLabel = stoi(predictionStr);
 
 
-
-        if(stoi(buffer) == 0){
+        if (predictedLabel == 0) {
             cout << 0 << endl;
             float maxSim = 0;
             float AveSim = 0;
             float minSim = 0;
             int pathLength = 0;
             //DKSP
-//            vector<int> kResults;
-//            vector<vector<int> > vkPath;
-//            //t1 = std::chrono::high_resolution_clock::now();
-//            obj1.eKSPCompare(&G, ID1, ID2, k, kResults, vkPath, t, vSPTDistance, vSPTParent, vSPTHeight, vSPTParentEdge, vSPTChildren, vSPT, vvPathCandidate, vvPathCandidateEdge,maxSim);
-//            t2 = std::chrono::high_resolution_clock::now();
-//            time_span = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1);
-
-            //OP
-            RoadNetwork *rN = 0;
-            rN = new RoadNetwork(graphFile.c_str());
-            NodeID source = ID1;
-            NodeID target = ID2;
-            double theta = t;
-            vector<Path> result;
-            //t1 = std::chrono::high_resolution_clock::now();
-            result = onepass(rN,source,target,k,theta,AveSim,minSim,maxSim);
+            vector<int> kResults;
+            vector<vector<int> > vkPath;
+            obj1.eKSPCompare(&G, ID1, ID2, k, kResults, vkPath, t, vSPTDistance, vSPTParent, vSPTHeight, vSPTParentEdge, vSPTChildren, vSPT, vvPathCandidate, vvPathCandidateEdge,maxSim);
             t2 = std::chrono::high_resolution_clock::now();
             time_span = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1);
+            //DKSP
+
+            //OP
+//            RoadNetwork *rN = 0;
+//            rN = new RoadNetwork(graphFile.c_str());
+//            NodeID source = ID1;
+//            NodeID target = ID2;
+//            double theta = t;
+//            vector<Path> result;
+//            result = onepass(rN,source,target,k,theta,AveSim,minSim,maxSim);
+//            t2 = std::chrono::high_resolution_clock::now();
+//            time_span = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1);
+            //OP
 
             if(time_span.count() > 5){
-                //DS
+//                DS
 //                obj1.DynamicSimilarity(&G, ID1, ID2, k, kResults, vkPath, t, vSPTDistance, vSPTParent, vSPTHeight, vSPTParentEdge, vSPTChildren, vSPT, vvPathCandidate, vvPathCandidateEdge, maxSim);
 //                t2 = std::chrono::high_resolution_clock::now();
 //                totalMaxSim += maxSim;
@@ -290,8 +287,40 @@ int main() {
                 //esxc
 
                 //If it is OP close this part
-//                RoadNetwork *rN = 0;
-//                rN = new RoadNetwork(graphFile.c_str());
+                RoadNetwork *rN = 0;
+                rN = new RoadNetwork(graphFile.c_str());
+                //If it is OP close this part
+                pair<vector<Path>, double> completeResult;
+                NodeID source = ID1;
+                NodeID target = ID2;
+                double theta = t;
+                vector<Path> result;
+                completeResult = esx_complete(rN,source,target,k,theta,AveSim,minSim,maxSim);
+                t2 = std::chrono::high_resolution_clock::now();
+                result = completeResult.first;
+                cout << source << "\t" << target << "\t["<< result[0].length;
+                pathLength += result[0].length;
+                for(unsigned int j = 1;j<result.size();j++) {
+                    //totalResultLengthSize += 1;
+                    cout << "," << result[j].length;
+                    pathLength += result[j].length;
+                }
+                cout << "]" << endl;
+                totalMaxSim += maxSim;
+                int tempAverage = pathLength / result.size();
+                cout << " AveLength:" << tempAverage << endl;
+                averageLength.push_back(tempAverage);
+                time_span = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1);
+                cout << "Simple Time:" << time_span.count() << endl;
+                totalTime += time_span.count();
+                cout << endl;
+                cout << endl;
+                cout << endl;
+
+                //svp
+//                // If it is OP close this part
+////                RoadNetwork *rN = 0;
+////                rN = new RoadNetwork(graphFile.c_str());
 //                //If it is OP close this part
 //                pair<vector<Path>, double> completeResult;
 //                NodeID source = ID1;
@@ -299,10 +328,10 @@ int main() {
 //                double theta = t;
 //                vector<Path> result;
 //                //t1 = std::chrono::high_resolution_clock::now();
-//                completeResult = esx_complete(rN,source,target,k,theta,AveSim,minSim,maxSim);
+//                completeResult = svp_plus_complete(rN,source,target,k,theta,AveSim,minSim,maxSim);
 //                t2 = std::chrono::high_resolution_clock::now();
 //                result = completeResult.first;
-//                cout << source << "\t" << target << "\t["<< result[0].length;
+//                cout << source << "\t" << target << "\t[" << result[0].length;
 //                pathLength += result[0].length;
 //                for(unsigned int j = 1;j<result.size();j++) {
 //                    //totalResultLengthSize += 1;
@@ -321,82 +350,51 @@ int main() {
 //                cout << endl;
 //                cout << endl;
 
-                //svp
-//                //If it is OP close this part
-//                RoadNetwork *rN = 0;
-//                rN = new RoadNetwork(graphFile.c_str());
-//                //If it is OP close this part
-                pair<vector<Path>, double> completeResult;
-                NodeID source = ID1;
-                NodeID target = ID2;
-                double theta = t;
-                vector<Path> result;
-                //t1 = std::chrono::high_resolution_clock::now();
-                completeResult = svp_plus_complete(rN,source,target,k,theta,AveSim,minSim,maxSim);
-                t2 = std::chrono::high_resolution_clock::now();
-                result = completeResult.first;
-                cout << source << "\t" << target << "\t[" << result[0].length;
-                pathLength += result[0].length;
-                for(unsigned int j = 1;j<result.size();j++) {
-                    //totalResultLengthSize += 1;
-                    cout << "," << result[j].length;
-                    pathLength += result[j].length;
+                //
+            }
+            else{
+                //DKSP
+                for(auto& d : kResults){
+                    cout << d << "\t";
+                    pathLength += d;
                 }
-                cout << "]" << endl;
+                cout << endl;
                 totalMaxSim += maxSim;
-                int tempAverage = pathLength / result.size();
+                int tempAverage = pathLength / kResults.size();
                 cout << " AveLength:" << tempAverage << endl;
                 averageLength.push_back(tempAverage);
-                time_span = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1);
                 cout << "Simple Time:" << time_span.count() << endl;
                 totalTime += time_span.count();
                 cout << endl;
                 cout << endl;
                 cout << endl;
-
-                //
-            }
-            else{
                 //DKSP
-//                for(auto& d : kResults){
-//                    cout << d << "\t";
-//                    pathLength += d;
+
+                //OP
+//                cout << source << "\t" << target << "\t[" << result[0].length;
+//                pathLength += result[0].length;
+//                for(unsigned int j = 1;j<result.size();j++) {
+//                    //totalResultLengthSize += 1;
+//                    cout << "," << result[j].length;
+//                    pathLength += result[j].length;
 //                }
-//                cout << endl;
+//                cout << "]" << endl;
 //                totalMaxSim += maxSim;
-//                int tempAverage = pathLength / kResults.size();
+//                int tempAverage = pathLength / result.size();
 //                cout << " AveLength:" << tempAverage << endl;
 //                averageLength.push_back(tempAverage);
+//                time_span = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1);
 //                cout << "Simple Time:" << time_span.count() << endl;
 //                totalTime += time_span.count();
 //                cout << endl;
 //                cout << endl;
 //                cout << endl;
-
                 //OP
-                cout << source << "\t" << target << "\t[" << result[0].length;
-                pathLength += result[0].length;
-                for(unsigned int j = 1;j<result.size();j++) {
-                    //totalResultLengthSize += 1;
-                    cout << "," << result[j].length;
-                    pathLength += result[j].length;
-                }
-                cout << "]" << endl;
-                totalMaxSim += maxSim;
-                int tempAverage = pathLength / result.size();
-                cout << " AveLength:" << tempAverage << endl;
-                averageLength.push_back(tempAverage);
-                time_span = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1);
-                cout << "Simple Time:" << time_span.count() << endl;
-                totalTime += time_span.count();
-                cout << endl;
-                cout << endl;
-                cout << endl;
 
 
             }
         }
-        else if(stoi(buffer) == 1) {
+        else if (predictedLabel == 1) {
             cout << 1 << endl;
             int pathLength = 0;
             float maxSim = 0;
@@ -423,51 +421,20 @@ int main() {
 //            cout << endl;
 
 
-//            //esx
-//            RoadNetwork *rN = 0;
-//            rN = new RoadNetwork(graphFile.c_str());
-//            pair<vector<Path>, double> completeResult;
-//            NodeID source = ID1;
-//            NodeID target = ID2;
-//            double theta = t;
-//            vector<Path> result;
-//            t1 = std::chrono::high_resolution_clock::now();
-//            completeResult = esx_complete(rN,source,target,k,theta,AveSim,minSim,maxSim);
-//            t2 = std::chrono::high_resolution_clock::now();
-//            result = completeResult.first;
-//            cout << source << "\t" << target << "\t[" << result[0].length;
-//            pathLength += result[0].length;
-//            for(unsigned int j = 1;j<result.size();j++) {
-//                cout << "," << result[j].length;
-//                pathLength += result[j].length;
-//            }
-//            cout << "]" << endl;
-//            totalMaxSim += maxSim;
-//            int tempAverage = pathLength / result.size();
-//            cout << " AveLength:" << tempAverage << endl;
-//            averageLength.push_back(tempAverage);
-//            time_span = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1);
-//            cout << "Complex Time:" << time_span.count() << endl;
-//            totalTime += time_span.count();
-//            cout << endl;
-//            cout << endl;
-//            cout << endl;
-
-            //svp
+            //esx
             RoadNetwork *rN = 0;
             rN = new RoadNetwork(graphFile.c_str());
             pair<vector<Path>, double> completeResult;
             NodeID source = ID1;
             NodeID target = ID2;
             double theta = t;
-            t1 = std::chrono::high_resolution_clock::now();
-            completeResult = svp_plus_complete(rN,source,target,k,theta,AveSim,minSim,maxSim);
-            t2 = std::chrono::high_resolution_clock::now();
             vector<Path> result;
+            completeResult = esx_complete(rN,source,target,k,theta,AveSim,minSim,maxSim);
+            t2 = std::chrono::high_resolution_clock::now();
             result = completeResult.first;
             cout << source << "\t" << target << "\t[" << result[0].length;
             pathLength += result[0].length;
-            for(unsigned int j = 1; j<result.size();j++) {
+            for(unsigned int j = 1;j<result.size();j++) {
                 cout << "," << result[j].length;
                 pathLength += result[j].length;
             }
@@ -482,6 +449,35 @@ int main() {
             cout << endl;
             cout << endl;
             cout << endl;
+
+            //svp
+//            RoadNetwork *rN = 0;
+//            rN = new RoadNetwork(graphFile.c_str());
+//            pair<vector<Path>, double> completeResult;
+//            NodeID source = ID1;
+//            NodeID target = ID2;
+//            double theta = t;
+//            completeResult = svp_plus_complete(rN,source,target,k,theta,AveSim,minSim,maxSim);
+//            t2 = std::chrono::high_resolution_clock::now();
+//            vector<Path> result;
+//            result = completeResult.first;
+//            cout << source << "\t" << target << "\t[" << result[0].length;
+//            pathLength += result[0].length;
+//            for(unsigned int j = 1; j<result.size();j++) {
+//                cout << "," << result[j].length;
+//                pathLength += result[j].length;
+//            }
+//            cout << "]" << endl;
+//            totalMaxSim += maxSim;
+//            int tempAverage = pathLength / result.size();
+//            cout << " AveLength:" << tempAverage << endl;
+//            averageLength.push_back(tempAverage);
+//            time_span = std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1);
+//            cout << "Complex Time:" << time_span.count() << endl;
+//            totalTime += time_span.count();
+//            cout << endl;
+//            cout << endl;
+//            cout << endl;
         }
         else
             cout << "error" << endl;
@@ -497,7 +493,9 @@ int main() {
     cout << "sumLength: " << sumLength << "aveSize: " << averageLength.size() << endl;
     totalMaxSim = totalMaxSim / averageLength.size();
 
-    //cout << "Hybird Time : " << totalTime/ID1List.size() << " Average Length: " << totalResultLength/totalResultLengthSize << endl;
     cout << "Hybird Time : " << totalTime/ID1List.size() << " Average Length: " << meanLength << " maxSim: " << totalMaxSim << endl;
+
+
+
     return 0;
 }

@@ -1,7 +1,7 @@
 import socket
 import torch
 from torch_geometric.data import Data
-from ServerModel import LitClassifier
+from COLServerModel_Trans import LitClassifier
 import pytorch_lightning as pl
 
 torch.cuda.set_device('cuda:7')
@@ -76,11 +76,11 @@ def server():
         s.listen()
         print("Server is waiting for connection...")
 
-        # model = LitClassifier.load_from_checkpoint("~/zihan/NY_GNN/checkpoint/lightning_logs/version_187/checkpoints/epoch=5-val_loss=0.47.ckpt")
-        # model = LitClassifier.load_from_checkpoint(
-        #     "./epoch=5-val_loss=363.05.ckpt")
         model = LitClassifier.load_from_checkpoint(
-            "./epoch=11-val_loss=334.66.ckpt")
+        # NY model
+        #     "./epoch=5-val_loss=363.05.ckpt")
+        # COL model
+            "./epoch=19-val_loss=nan.ckpt")
         model.to("cuda:7")
         trainer = pl.Trainer(accelerator="gpu", devices=[7])
 
@@ -91,20 +91,15 @@ def server():
                 print("Connected by", addr)
                 try:
                     received_data = receive_all(conn, BUFFER_SIZE)
-                    #print(received_data)
 
                     parts = received_data.split('|')
-                    #if len(parts) < 4:
                     if len(parts) < 5:
                         print("Invalid data received")
                         continue
 
-                    #edge_attribute, edge_index, graph_data, tabular_data_str = parts[:4]
-                    #tabular_data = torch.tensor(list(map(float, tabular_data_str.split(','))), dtype=torch.float)
                     edge_attribute, edge_index, graph_data, tabular_data_str, tabular_data2_str = parts[:5]
                     tabular_data1 = torch.tensor(list(map(float, tabular_data_str.split(','))), dtype=torch.float)
                     tabular_data2 = torch.tensor(list(map(float, tabular_data2_str.split(','))), dtype=torch.float)
-                    #batch = process_data(edge_attribute, edge_index, graph_data, tabular_data)
                     batch = process_data(edge_attribute, edge_index, graph_data, tabular_data1, tabular_data2)
                     batch = batch.to("cuda:7")
 

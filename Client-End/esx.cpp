@@ -281,8 +281,8 @@ pair<vector<Path>,double> esx_complete(RoadNetwork *rN, NodeID source, NodeID ta
 					if(simMin < minSim) {		
 						minSim = simMin;
 					}
-                    cout << "minSim: " << minSim << endl;
-                    cout << "maxSim: " << maxSim << endl;
+//                    cout << "minSim: " << minSim << endl;
+//                    cout << "maxSim: " << maxSim << endl;
                     //cout << currentTheta << endl;
 					resPaths.push_back(newP);
 					if(resPaths.size() == k)

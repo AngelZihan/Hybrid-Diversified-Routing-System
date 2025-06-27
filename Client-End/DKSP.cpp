@@ -237,7 +237,20 @@ int Classification::eKSPCompare(Graph* _g, int ID1, int ID2, int k, vector<int>&
                             //Sim 1
                             sim = simAdd / (kResults[i] + topPathDistance - simAdd);
                             //cout << "vPathFix[topPathID][j]: "<< vPathFix[topPathID][j] << " vPathLCA[topPathID][j]: " << vPathLCA[topPathID][j] << " mPathFix[i]: " << mPathFix[i] << endl;
-
+                            //Sim 2
+//                            sim = simAdd / (2*kResults[i]) + simAdd / (2*topPathDistance);
+                            //Sim 3
+//							sim = sqrt((simAdd*simAdd) / ((double)kResults[i]*(double)topPathDistance));
+                            //Sim 4
+//                            sim = simAdd / topPathDistance;
+//                            int maxLength;
+//                            if(addLength > topPathDistance)
+//                                maxLength = simAdd;
+//                            else
+//                                maxLength = topPathDistance;
+//                            sim = simAdd / maxLength;
+                            //Sim 5
+//                            sim = simAdd / kResults[i];
                             break;
                         }
                     }
@@ -253,6 +266,20 @@ int Classification::eKSPCompare(Graph* _g, int ID1, int ID2, int k, vector<int>&
                         //Sim 1
                         sim = addLength / (kResults[i] + topPathDistance - addLength);
                         //cout << "addLength: "<< addLength << " kResults[i] + topPathDistance - addLength: " << (kResults[i] + topPathDistance - addLength) << endl;
+                        //Sim 2
+//                        sim = addLength / (2*kResults[i]) + addLength / (2*topPathDistance);
+                        //Sim 3
+//                        sim = sqrt((addLength*addLength) / ((double)kResults[i]*(double)topPathDistance));
+                        //Sim 4
+//                        sim = addLength/ topPathDistance;
+//                        int maxLength;
+//                        if(addLength > topPathDistance)
+//                            maxLength = addLength;
+//                        else
+//                            maxLength = topPathDistance;
+//                        sim = addLength / maxLength;
+                        //Sim 5
+//                        sim = addLength / kResults[i];
                         addLength = 0;
                     }
                     simCount += sim;

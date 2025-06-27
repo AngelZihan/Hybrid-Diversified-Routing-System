@@ -86,13 +86,13 @@ double Path::overlap_ratio(RoadNetwork *rN, Path &path2) {
     //s1
 	return sharedLength/(this->length+path2.length-sharedLength);
     //s2
-    //return sharedLength/(2*path2.length) + sharedLength/(2*this->length);
+//    return sharedLength/(2*path2.length) + sharedLength/(2*this->length);
     //s3
-    //return sqrt((sharedLength*sharedLength) / ((double)path2.length*(double)this->length));
+//    return sqrt((sharedLength*sharedLength) / ((double)path2.length*(double)this->length));
     //s4
-	//return sharedLength / maxLength;
+//	return sharedLength / maxLength;
     //s5
-   // return sharedLength/path2.length;
+//    return sharedLength/path2.length;
 }
 
 bool operator==(const Path& lp, const Path& rp) {
